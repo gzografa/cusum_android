@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">cusum_android</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="cusum_info">Android CUSUM first screen</string>
+    <string name="action_settings">Settings</string>
+</resources>
