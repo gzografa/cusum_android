@@ -1,14 +1,17 @@
 package com.example.giannis.cusum_android;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.telephony.*;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
@@ -18,10 +21,14 @@ import java.util.UUID;
 
 public class MainActivity extends Activity {
 
-    private final static UUID PEBBLE_APP_UUID = UUID.fromString("1C50DB4A-8F61-48C2-8D1F-A03AAA134F96");
+//    private final static UUID PEBBLE_APP_UUID = UUID.fromString("1C50DB4A-8F61-48C2-8D1F-A03AAA134F96");
+    private final static UUID PEBBLE_APP_UUID = UUID.fromString("592BBBDE-ED83-4D0F-9FB8-9E1352A8B67D");
     private final static int FALL = 0;
     GPSTracker gps;
-
+    GMailSender sender;
+    String email = "I fell! Please help!";
+    String username = "gianniseapdiplwmatiki@gmail.com";
+    String password = "giannisEAP";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,28 +63,30 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        PebbleKit.startAppOnPebble(getApplicationContext(),PEBBLE_APP_UUID);
-
         // Construct output String
         StringBuilder builder = new StringBuilder();
-        builder.append("Pebble Info\n\n");
 
         // Is the watch connected?
         boolean isConnected = PebbleKit.isWatchConnected(this);
-        builder.append("Watch connected: " + (isConnected ? "true" : "false")).append("\n");
+        if(isConnected){
+            PebbleKit.startAppOnPebble(getApplicationContext(),PEBBLE_APP_UUID);
+            builder.append("Your Pebble watch is connected").append("\n");
+        }else{
+            builder.append("Pebble watch not connected").append("\n");
+            builder.append("Please connect it and restart the app").append("\n");
+        }
 
-        // What is the firmware version?
-        PebbleKit.FirmwareVersionInfo info = PebbleKit.getWatchFWVersion(this);
-        builder.append("Firmware version: ");
-        builder.append(info.getMajor()).append(".");
-        builder.append(info.getMinor()).append("\n");
-
-        // Is AppMesage supported?
-        boolean appMessageSupported = PebbleKit.areAppMessagesSupported(this);
-        builder.append("AppMessage supported: " + (appMessageSupported ? "true" : "false"));
+//        PebbleKit.FirmwareVersionInfo info = PebbleKit.getWatchFWVersion(this);
+//        builder.append("Firmware version: ");
+//        builder.append(info.getMajor()).append(".");
+//        builder.append(info.getMinor()).append("\n");
+//
+//        boolean appMessageSupported = PebbleKit.areAppMessagesSupported(this);
+//        builder.append("AppMessage supported: " + (appMessageSupported ? "true" : "false"));
 
         TextView textView = (TextView)findViewById(R.id.firstString);
         textView.setText(builder.toString());
+
 
         //registers the data receiver
         PebbleKit.registerReceivedDataHandler(getApplicationContext(), dataReceiver);
@@ -93,7 +102,8 @@ public class MainActivity extends Activity {
             Log.i("DATA RECEIVED", dict.getString(0));
             TextView textView = (TextView)findViewById(R.id.firstString);
             textView.setText(dict.getString(0));
-            sendSMS();
+//            sendSMS();
+            sendEmail();
             // A new AppMessage was received, tell Pebble. if an ACK is not send timeout may occur.
             PebbleKit.sendAckToPebble(context, transaction_id);
         }
@@ -110,7 +120,6 @@ public class MainActivity extends Activity {
             smsManager.sendTextMessage(phoneNo, null, sms, null, null);
             Toast.makeText(getApplicationContext(), "SMS Sent!",
                     Toast.LENGTH_LONG).show();
-            getLocation();
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(),
                     "SMS failed, please try again later!",
@@ -118,6 +127,56 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
+
+    protected void sendEmail(){
+
+        ImageView image = (ImageView) findViewById(R.id.imageView);
+        image.setImageResource(R.drawable.wet_floor);
+
+        sender = new GMailSender(username, password);
+        try {
+            new MyAsyncClass().execute();
+
+        } catch (Exception ex) {
+            Toast.makeText(getApplicationContext(), ex.toString(), 100).show();
+        }
+    }
+
+    class MyAsyncClass extends AsyncTask<Void, Void, Void> {
+
+        ProgressDialog pDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            email = email +getLocation().toString();
+
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("Please wait...");
+            pDialog.show();
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... mApi) {
+            try {
+                // Add subject, Body, your mail Id, and receiver mail Id.
+                sender.sendMail("Need help", email, "gianniseapdiplwmatiki@gmail.com", "gzografa@gmail.com");
+            }
+            catch (Exception ex) {
+                Log.i("exception caught", ex.toString());
+            }
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            pDialog.cancel();
+            Toast.makeText(getApplicationContext(), "Email send", 100).show();
+        }
+    }
+
 
     protected String getLocation(){
         gps = new GPSTracker(MainActivity.this);
@@ -152,6 +211,8 @@ public class MainActivity extends Activity {
 
         return location.toString();
     }
+
+
 
     @Override
     protected void onDestroy(){
