@@ -3,6 +3,8 @@ package com.example.giannis.cusum_android;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -15,6 +17,9 @@ import android.widget.Toast;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.UUID;
 
@@ -29,6 +34,11 @@ public class MainActivity extends Activity {
     String email = "I fell! Please help!";
     String username = "gianniseapdiplwmatiki@gmail.com";
     String password = "giannisEAP";
+    String phoneNo = "6976652492";
+    String emailReceiver = "gzografa@gmail.com";
+
+    SharedPreferences sharedpreferences;
+    String CONTACTPREFERENCES =  "contactPreferences";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +63,12 @@ public class MainActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Toast.makeText(getApplicationContext(),
+                    "Settings pressed",
+                    Toast.LENGTH_LONG).show();
+            Intent myIntent = new Intent(MainActivity.this,
+                    Contact.class);
+            startActivity(myIntent);
             return true;
         }
 
@@ -71,6 +87,23 @@ public class MainActivity extends Activity {
         if(isConnected){
             PebbleKit.startAppOnPebble(getApplicationContext(),PEBBLE_APP_UUID);
             builder.append("Your Pebble watch is connected").append("\n");
+            SharedPreferences prefs = getSharedPreferences(CONTACTPREFERENCES, MODE_PRIVATE);
+            String restoredText = prefs.getString("Contact", null);
+            if(restoredText != null){
+                try {
+                    TextView sampleTextView;
+                    JSONObject obj = new JSONObject(restoredText);
+                    String name = obj.getString("name");
+                    String mobile = obj.getString("mobile");
+                    String email = obj.getString("email");
+                    builder.append("Emergency contact name :"+name).append("\n");
+                    builder.append("Emergency phone        :"+mobile).append("\n");
+                    builder.append("Emergency email        :"+email).append("\n");
+                    changeEmergencyDetails(mobile,email);
+                }catch (JSONException ex){
+                    Log.i("tag ","error on parsing string");
+                }
+            }
         }else{
             builder.append("Pebble watch not connected").append("\n");
             builder.append("Please connect it and restart the app").append("\n");
@@ -110,7 +143,6 @@ public class MainActivity extends Activity {
 
     };
     protected void sendSMS() {
-        String phoneNo = "6976652492";
         String sms = "I fell! Please help!";
 
         sms = sms + getLocation().toString();
@@ -162,7 +194,7 @@ public class MainActivity extends Activity {
         protected Void doInBackground(Void... mApi) {
             try {
                 // Add subject, Body, your mail Id, and receiver mail Id.
-                sender.sendMail("Need help", email, "gianniseapdiplwmatiki@gmail.com", "gzografa@gmail.com");
+                sender.sendMail("Need help", email, "gianniseapdiplwmatiki@gmail.com", emailReceiver);
             }
             catch (Exception ex) {
                 Log.i("exception caught", ex.toString());
@@ -212,6 +244,10 @@ public class MainActivity extends Activity {
         return location.toString();
     }
 
+    public void changeEmergencyDetails(String mobile, String email){
+        phoneNo = mobile;
+        emailReceiver = email;
+    }
 
 
     @Override

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_contact"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.giannis.cusum_android.Contact"
+    android:background="#cfcfcf">
+
+    <TextView
+        android:text="Emergency contact details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/contactTextView"
+        tools:layout_editor_absoluteY="104dp"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+        tools:layout_editor_absoluteX="61dp" />
+
+    <EditText
+        android:layout_width="215dp"
+        android:layout_height="42dp"
+        android:inputType="textPersonName"
+        android:ems="10"
+        tools:layout_editor_absoluteX="26dp"
+        android:id="@+id/name"
+        android:hint="Name"
+        app:layout_constraintTop_toBottomOf="@+id/contactTextView"
+        android:layout_marginTop="32dp" />
+
+    <EditText
+        android:layout_width="218dp"
+        android:layout_height="46dp"
+        android:inputType="phone"
+        android:ems="10"
+        android:id="@+id/mobile"
+        android:hint="Mobile phone"
+        app:layout_constraintTop_toBottomOf="@+id/name"
+        android:layout_marginTop="16dp"
+        app:layout_constraintRight_toRightOf="@+id/name" />
+
+    <EditText
+        android:layout_width="218dp"
+        android:layout_height="46dp"
+        android:inputType="textEmailAddress"
+        android:ems="10"
+        android:id="@+id/email"
+        android:hint="Email"
+        app:layout_constraintTop_toBottomOf="@+id/mobile"
+        android:layout_marginTop="16dp"
+        app:layout_constraintRight_toRightOf="@+id/name" />
+
+    <Button
+        android:text="Clear"
+        android:layout_width="88dp"
+        android:layout_height="48dp"
+        android:id="@+id/clear"
+        android:onClick="clearContactForm"
+        app:layout_constraintTop_toTopOf="@+id/activity_contact"
+        android:layout_marginTop="432dp"
+        app:layout_constraintRight_toRightOf="@+id/email" />
+
+    <Button
+        android:text="Save"
+        android:layout_width="88dp"
+        android:layout_height="48dp"
+        android:id="@+id/save"
+        android:onClick="saveContactForm"
+        app:layout_constraintRight_toRightOf="@+id/activity_contact"
+        android:layout_marginEnd="40dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/clear" />
+
+</android.support.constraint.ConstraintLayout>
