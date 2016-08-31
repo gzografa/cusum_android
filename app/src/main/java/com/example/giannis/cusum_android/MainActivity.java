@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -127,6 +130,7 @@ public class MainActivity extends Activity {
         @Override
         public void receiveData(Context context, int transaction_id,
                                 PebbleDictionary dict) {
+            startSound();
             sendSMS();
             sendEmail();
             changeLayoutUI();
@@ -175,6 +179,16 @@ public class MainActivity extends Activity {
         image.setImageResource(R.drawable.wet_floor);
         View myView = findViewById(R.id.mainView);
         myView.setBackgroundColor(Color.parseColor("#ee4c50"));
+    }
+
+    protected void startSound(){
+        try {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            r.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     class MyAsyncClass extends AsyncTask<Void, Void, Void> {
