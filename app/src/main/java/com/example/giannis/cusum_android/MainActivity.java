@@ -5,12 +5,15 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +35,7 @@ public class MainActivity extends Activity {
     GPSTracker gps;
     GMailSender sender;
     String email = "I fell! Please help!";
+//    String email = "&lt;!DOCTYPE html PUBLIC \\\"-//W3C//DTD XHTML 1.0 Transitional//EN\\\" \\\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\\\"&gt;&lt;html xmlns=\\\"http://www.w3.org/1999/xhtml\\\"&gt; &lt;head&gt; &lt;meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /&gt; &lt;title&gt;A Simple Responsive HTML Email&lt;/title&gt; &lt;style type=\\\"text/css\\\"&gt; body {margin: 0; padding: 0; min-width: 100%!important;} .content {width: 100%; max-width: 600px;} .content {padding: 40px 30px 20px 30px;} @media only screen and (min-device-width: 601px) { .content {width: 600px !important;} } .header {padding: 40px 30px 20px 30px;} &lt;/style&gt; &lt;/head&gt; &lt;body yahoo bgcolor=\\\"#f6f8f1\\\"&gt; &lt;table width=\\\"100%\\\" bgcolor=\\\"#f6f8f1\\\" border=\\\"0\\\" cellpadding=\\\"0\\\" cellspacing=\\\"0\\\"&gt; &lt;tr&gt; &lt;td&gt; &lt;table class=\\\"content\\\" align=\\\"center\\\" cellpadding=\\\"0\\\" cellspacing=\\\"0\\\" border=\\\"0\\\"&gt; &lt;tr&gt; &lt;td class=\\\"header\\\" bgcolor=\\\"#c7d8a7\\\"&gt; &lt;table width=\\\"70\\\" align=\\\"left\\\" border=\\\"0\\\" cellpadding=\\\"0\\\" cellspacing=\\\"0\\\"&gt; &lt;tr&gt; &lt;td height=\\\"70\\\" style=\\\"padding: 0 20px 20px 0;\\\"&gt; &lt;img src=\\\"p11.png\\\" width=\\\"70\\\" height=\\\"70\\\" border=\\\"0\\\" alt=\\\"\\\" / &gt; &lt;/td&gt; &lt;/tr&gt; &lt;/table&gt; &lt;/td&gt; &lt;/tr&gt; &lt;/table&gt; &lt;table class=\\\"content\\\" align=\\\"center\\\" cellpadding=\\\"0\\\" cellspacing=\\\"0\\\" border=\\\"0\\\"&gt; &lt;tr&gt; &lt;td class=\\\"header\\\" bgcolor=\\\"#5499C7\\\"&gt; &lt;table width=\\\"70\\\" align=\\\"left\\\" border=\\\"0\\\" cellpadding=\\\"0\\\" cellspacing=\\\"0\\\"&gt; &lt;tr&gt; &lt;td height=\\\"70\\\" style=\\\"padding: 0 20px 20px 0;\\\"&gt; BASIC CONTENT &lt;/td&gt; &lt;/tr&gt; &lt;/table&gt; &lt;/td&gt; &lt;/tr&gt; &lt;/table&gt; &lt;/td&gt; &lt;/tr&gt; &lt;/table&gt; &lt;/body&gt;&lt;/html&gt;";
     String username = "gianniseapdiplwmatiki@gmail.com";
     String password = "giannisEAP";
     String phoneNo = "6976652492";
@@ -63,9 +67,6 @@ public class MainActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Toast.makeText(getApplicationContext(),
-                    "Settings pressed",
-                    Toast.LENGTH_LONG).show();
             Intent myIntent = new Intent(MainActivity.this,
                     Contact.class);
             startActivity(myIntent);
@@ -107,15 +108,9 @@ public class MainActivity extends Activity {
         }else{
             builder.append("Pebble watch not connected").append("\n");
             builder.append("Please connect it and restart the app").append("\n");
+            View myView = findViewById(R.id.mainView);
+            myView.setBackgroundColor(Color.parseColor("#f0f0a6"));
         }
-
-//        PebbleKit.FirmwareVersionInfo info = PebbleKit.getWatchFWVersion(this);
-//        builder.append("Firmware version: ");
-//        builder.append(info.getMajor()).append(".");
-//        builder.append(info.getMinor()).append("\n");
-//
-//        boolean appMessageSupported = PebbleKit.areAppMessagesSupported(this);
-//        builder.append("AppMessage supported: " + (appMessageSupported ? "true" : "false"));
 
         TextView textView = (TextView)findViewById(R.id.firstString);
         textView.setText(builder.toString());
@@ -132,20 +127,18 @@ public class MainActivity extends Activity {
         @Override
         public void receiveData(Context context, int transaction_id,
                                 PebbleDictionary dict) {
-            Log.i("DATA RECEIVED", dict.getString(0));
-            TextView textView = (TextView)findViewById(R.id.firstString);
-            textView.setText(dict.getString(0));
-//            sendSMS();
+            sendSMS();
             sendEmail();
+            changeLayoutUI();
             // A new AppMessage was received, tell Pebble. if an ACK is not send timeout may occur.
             PebbleKit.sendAckToPebble(context, transaction_id);
         }
-
     };
+
     protected void sendSMS() {
         String sms = "I fell! Please help!";
 
-        sms = sms + getLocation().toString();
+        sms = sms + getLocation();
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
@@ -162,9 +155,6 @@ public class MainActivity extends Activity {
 
     protected void sendEmail(){
 
-        ImageView image = (ImageView) findViewById(R.id.imageView);
-        image.setImageResource(R.drawable.wet_floor);
-
         sender = new GMailSender(username, password);
         try {
             new MyAsyncClass().execute();
@@ -172,6 +162,19 @@ public class MainActivity extends Activity {
         } catch (Exception ex) {
             Toast.makeText(getApplicationContext(), ex.toString(), 100).show();
         }
+    }
+
+    protected void changeLayoutUI(){
+        TextView textView = (TextView)findViewById(R.id.firstString);
+        textView.setText("Fall Detected");
+        textView.setGravity(Gravity.CENTER);
+        textView.setTextSize(30);
+
+
+        ImageView image = (ImageView) findViewById(R.id.imageView);
+        image.setImageResource(R.drawable.wet_floor);
+        View myView = findViewById(R.id.mainView);
+        myView.setBackgroundColor(Color.parseColor("#ee4c50"));
     }
 
     class MyAsyncClass extends AsyncTask<Void, Void, Void> {
@@ -182,7 +185,10 @@ public class MainActivity extends Activity {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            email = email +getLocation().toString();
+            SharedPreferences prefs = getSharedPreferences(CONTACTPREFERENCES, MODE_PRIVATE);
+            String restoredText = prefs.getString("Contact", null);
+
+            email = addCoordinatesToJSOn(restoredText);
 
             pDialog = new ProgressDialog(MainActivity.this);
             pDialog.setMessage("Please wait...");
@@ -193,6 +199,7 @@ public class MainActivity extends Activity {
         @Override
         protected Void doInBackground(Void... mApi) {
             try {
+                Log.i("******* email",emailReceiver);
                 // Add subject, Body, your mail Id, and receiver mail Id.
                 sender.sendMail("Need help", email, "gianniseapdiplwmatiki@gmail.com", emailReceiver);
             }
@@ -229,8 +236,6 @@ public class MainActivity extends Activity {
             location.append(",");
             location.append(longitude);
 
-            // \n is for new line
-            Toast.makeText(getApplicationContext(), location.toString(), Toast.LENGTH_LONG).show();
         }else{
             // can't get location
             // GPS or Network is not enabled
@@ -238,10 +243,26 @@ public class MainActivity extends Activity {
 //            gps.showSettingsAlert();
             location.append(" No GPS data");
         }
-
-
-
         return location.toString();
+    }
+
+    public String addCoordinatesToJSOn(String strgifiedJSON){
+        gps = new GPSTracker(MainActivity.this);
+        // check if GPS enabled
+        StringBuilder location = new StringBuilder();
+        if(gps.canGetLocation()){
+            double latitude = gps.getLatitude();
+            double longitude = gps.getLongitude();
+            try {
+                JSONObject obj = new JSONObject(strgifiedJSON);
+                obj.put("latitude", latitude);
+                obj.put("longitude", longitude);
+                return  obj.toString();
+            }catch(JSONException ex){
+                return strgifiedJSON;
+            }
+        }
+        return strgifiedJSON;
     }
 
     public void changeEmergencyDetails(String mobile, String email){

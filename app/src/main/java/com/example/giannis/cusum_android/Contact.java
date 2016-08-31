@@ -12,8 +12,6 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static android.R.attr.id;
-
 public class Contact extends Activity {
     SharedPreferences sharedpreferences;
     String CONTACTPREFERENCES =  "contactPreferences";
@@ -78,8 +76,6 @@ public class Contact extends Activity {
         if(restoredText != null){
             setTextViews(restoredText);
         }
-        Toast.makeText(this, "retrieved data " +restoredText,
-                Toast.LENGTH_LONG).show();
     }
 
     public void setTextViews(String contact){
